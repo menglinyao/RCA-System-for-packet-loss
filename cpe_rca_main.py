@@ -148,8 +148,6 @@ kpi_plot = ['RSRP', 'RSRQ', 'RSSI', 'SINR', 'DL Usage', 'UL Usage', 'Total Usage
 plot_seq = ['Location', 'RSRP', 'RSRQ', 'RSSI', 'SINR', 'DL Usage', 'UL Usage', 'Total Usage', 'Speed']
 scaler_kpis = StandardScaler()
 
-# #################### deal with conversion, select a feame only contains inliers######################################
-# prepare a set of data that exclude white list
 
 read_file_str = "CPE_White_List_temp" + switch_cell_format(ecgi_name) + ".csv"
 white_ecgi = pd.read_csv(read_file_str, index_col=0)
@@ -170,33 +168,7 @@ train_data = white_data_cpe_alltime
 print("test sample: "+str(test_data.shape[0]))
 # test_data = test_data.reset_index()
 
-'''
-# ############################# converting anomaly data #######################################################
 
-data_bad_plr = pd.read_csv("clean_abnormal_plr.csv")
-bad_plr_proc = data_bad_plr.copy()
-bad_plr_proc = bad_plr_proc.drop_duplicates(subset=['starttime'], keep='last')
-n_bad_samples = bad_plr_proc.shape[0]
-print(n_bad_samples)
-
-polluted_cpe = pd.DataFrame(columns=feature_names)
-bad_plr_proc["stoptime"] = pd.to_datetime(bad_plr_proc["stoptime"], format='%Y/%m/%d %H:%M')
-bad_plr_proc["starttime"] = pd.to_datetime(bad_plr_proc["starttime"], format='%Y/%m/%d %H:%M')
-
-for sample_bad in range(0, n_bad_samples):
-    start_time = bad_plr_proc.loc[sample_bad, 'starttime']
-    end_time = bad_plr_proc.loc[sample_bad, 'stoptime']
-    mask = (data_cpe['starttime'] > (start_time-timedelta(minutes=time_delay_shift))) & \
-           (data_cpe['starttime'] <= (end_time-timedelta(minutes=time_delay_shift)))
-    polluted_cpe = polluted_cpe.append(data_cpe.loc[mask, :])
-
-polluted_cpe = polluted_cpe.reset_index()
-combine_cpe_data = pd.DataFrame(columns=feature_names)
-combine_cpe_data = combine_cpe_data.append(white_data_cpe)
-combine_cpe_data = combine_cpe_data.append(polluted_cpe)
-combine_cpe_data = combine_cpe_data.reset_index()
-# print(combine_cpe_data)
-'''
 # ######################################## AD on GPS ####################################################
 # test_data = pd.read_csv("CPE_White_List_tempVME11.csv")
 # test_data = polluted_cpe

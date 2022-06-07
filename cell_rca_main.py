@@ -20,7 +20,7 @@ from joblib import dump, load
 
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-# ############################################## Pre-processing ##################################################
+# ############################################## Pre define ##################################################
 root_menu = str(os.getcwd())
 similarity_threshold = 0.8
 min_similarity = 0.6
@@ -55,7 +55,7 @@ if os.path.exists(root_menu + "\\UL_Scaler_lib") is False:
 if os.path.exists(root_menu + "\\DL_Scaler_lib") is False:
         os.mkdir(root_menu + "\\DL_Scaler_lib")
 
-
+# auto feature reduction
 def calculate_vif_(X, thresh=5.0):
     variables = list(range(X.shape[1]))
     dropped = True
@@ -169,7 +169,7 @@ target = target_AD.iloc[1:9000, 0]
 Features = data_kpis_scaled.iloc[1:9000, operator.and_(data_kpis_scaled.columns != 'min5_pdcp_packets_lost_rate_dl',
                                                        data_kpis_scaled.columns != 'min5_pdcp_packets_lost_rate_ul')]
 '''
-# test data
+# select data to test
 if discontinuous == 0:
     target_test = target_AD.iloc[fragment_start:fragment_fin]
     Features_test = data_kpis.iloc[fragment_start:fragment_fin, operator.and_(

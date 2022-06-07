@@ -98,7 +98,7 @@ scaler_kpis = StandardScaler()
 data_kpis_scaled = scaler_kpis.fit_transform(data_kpis)
 data_kpis_scaled = pd.DataFrame(data_kpis_scaled, columns=all_features.columns)
 
-# #####################################AD ############################################
+# ##################################### Anomaly detection by thresholding ############################################
 data_f['Target_AD'] = data_f.iloc[:, data_f.columns == 'min5_pdcp_packets_lost_rate_ul'].copy()
 data_f.loc[operator.or_(data_f['min5_pdcp_packets_lost_rate_dl'] >= packet_loss_anomaly_threshold,
                         data_f['min5_pdcp_packets_lost_rate_ul'] >= packet_loss_anomaly_threshold), 'Target_AD'] = -1
@@ -131,7 +131,7 @@ plt.legend(
     loc="upper right", fontsize=13
 )
 plt.show()
-# ###################################### Auto-AD ###########################################
+# ###################################### Auto-AD isolation forest ###########################################
 '''
 model_itree = IsolationForest(n_estimators=100, max_samples='auto', max_features=1.0)
 model_itree.fit(data_kpis_scaled[['min5_pdcp_packets_lost_rate_ul',
@@ -182,7 +182,7 @@ abnormal_plr_samp.to_csv('clean_abnormal_plr.csv', index=False)
 
 
 # ################################################################################################################## #
-#                                             Add to white list algorithm                                            #
+#                                     Add data with normal PLR to white list algorithm                               #
 # ################################################################################################################## #
 
 
@@ -211,7 +211,6 @@ data_plr_proc = data_plr_proc.drop_duplicates(subset=['starttime'], keep='last')
 n_samples = data_plr_proc.shape[0]
 print(n_samples)
 
-# prepare a set of data that exclude white list
 test_data = data_cpe.copy()
 white_data_cpe = pd.DataFrame(columns=feature_names)
 data_plr_proc["stoptime"] = pd.to_datetime(data_plr_proc["stoptime"], format='%Y/%m/%d %H:%M')
@@ -228,6 +227,7 @@ for sample in range(0, n_samples):
 file_name_temp = "CPE_White_List_temp" + switch_cell_format(ecgi_name) + ".csv"
 file_name_alltime = "CPE_White_List_all" + switch_cell_format(ecgi_name) + ".csv"
 white_data_cpe.to_csv(file_name_temp, index=True)
+
 # ######################################## Turn it on when adding new data sets ########################################
 
 if Path(file_name_alltime).is_file():

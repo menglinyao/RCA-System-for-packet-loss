@@ -31,11 +31,18 @@ data_sel = data_sel.loc[:, ["starttime",
                             "min5_active_ues_with_data_beaerer"]]
 
 data_sel.dropna(inplace=True)
-# ######################################### Anomaly Detection By Standard ########################################
+
 
 # Label target (packet loss rate) as classes
 data_sel['UL_AD'] = data_sel.iloc[:, data_sel.columns == 'min5_pdcp_packets_lost_rate_ul'].copy()
 data_sel['DL_AD'] = data_sel.iloc[:, data_sel.columns == 'min5_pdcp_packets_lost_rate_ul'].copy()
+# ######################################### Anomaly Detection By threshold ########################################
+data_sel.loc[data_sel['min5_pdcp_packets_lost_rate_dl'] >= packet_loss_anomaly_threshold, 'DL_AD'] = 1
+data_sel.loc[data_sel['min5_pdcp_packets_lost_rate_dl'] < packet_loss_anomaly_threshold, 'DL_AD'] = 0
+data_sel.loc[data_sel['min5_pdcp_packets_lost_rate_ul'] >= packet_loss_anomaly_threshold, 'UL_AD'] = 1
+data_sel.loc[data_sel['min5_pdcp_packets_lost_rate_ul'] < packet_loss_anomaly_threshold, 'UL_AD'] = 0
+
+# isolatioin forest
 '''
 model_itree1 = IsolationForest(n_estimators=100, max_samples='auto', max_features=1.0)
 data_sel['UL_AD'] = model_itree1.fit_predict(data_sel['min5_pdcp_packets_lost_rate_ul'].values.reshape(-1, 1))
@@ -43,10 +50,8 @@ model_itree2 = IsolationForest(n_estimators=100, max_samples='auto', max_feature
 data_sel['DL_AD'] = model_itree2.fit_predict(data_sel['min5_pdcp_packets_lost_rate_dl'].values.reshape(-1, 1))
 
 '''
-data_sel.loc[data_sel['min5_pdcp_packets_lost_rate_dl'] >= packet_loss_anomaly_threshold, 'DL_AD'] = 1
-data_sel.loc[data_sel['min5_pdcp_packets_lost_rate_dl'] < packet_loss_anomaly_threshold, 'DL_AD'] = 0
-data_sel.loc[data_sel['min5_pdcp_packets_lost_rate_ul'] >= packet_loss_anomaly_threshold, 'UL_AD'] = 1
-data_sel.loc[data_sel['min5_pdcp_packets_lost_rate_ul'] < packet_loss_anomaly_threshold, 'UL_AD'] = 0
+
+
 ind = 0
 x = [1, 2]
 kpi_names =["min5_pdcp_packets_lost_rate_ul", "min5_pdcp_packets_lost_rate_dl"]
@@ -55,7 +60,7 @@ bool_list = ['UL_AD', 'DL_AD']
 data_plot_anomaly = data_sel.loc[:, kpi_names]
 targ_plot_anomaly = data_sel.loc[:, bool_list].copy()
 
-# #####################################################################
+# ##################################################################### plot
 for feat in kpi_names:
     x_p = data_plot_anomaly.loc[targ_plot_anomaly[bool_list[ind]] == 1, feat]
     x_n = data_plot_anomaly.loc[targ_plot_anomaly[bool_list[ind]] == -1, feat]
@@ -79,7 +84,7 @@ plt.xlim(0,0.05)
 plt.grid()
 plt.show()
 
-# ##############################manual
+# ############################## manual, multiclass
 
 
 '''
